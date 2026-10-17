@@ -57,7 +57,6 @@ const BENIGN = [
   "nginx: 10.0.4.19 \"POST /api/orders HTTP/1.1\" 201 87ms",
 ];
 
-const flag = (cc: string) => String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0)));
 const proj = (lat: number, lon: number) => ({ x: ((lon + 180) / 360) * 1000, y: ((90 - lat) / 180) * 500 });
 const now = () => new Date().toISOString().replace("T", " ").slice(0, 19);
 const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)] as T;
