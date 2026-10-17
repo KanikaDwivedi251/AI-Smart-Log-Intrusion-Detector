@@ -57,7 +57,6 @@ const BENIGN = [
   "nginx: 10.0.4.19 \"POST /api/orders HTTP/1.1\" 201 87ms",
 ];
 
-const flag = (cc: string) => String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0)));
 const proj = (lat: number, lon: number) => ({ x: ((lon + 180) / 360) * 1000, y: ((90 - lat) / 180) * 500 });
 const now = () => new Date().toISOString().replace("T", " ").slice(0, 19);
 const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)] as T;
@@ -250,7 +249,8 @@ function Dashboard() {
                       <path d={`M${p.x},${p.y} Q${mx},${my} ${t.x},${t.y}`} fill="none" stroke="var(--destructive)" strokeWidth="1.5" opacity="0.75" className="attack-line" />
                       <circle cx={p.x} cy={p.y} r="3" fill="none" stroke="var(--destructive)" strokeWidth="2" className="pulse-ring" />
                       <circle cx={p.x} cy={p.y} r="4" fill="var(--destructive)"><title>{`${s.country} — ${s.ips.join(", ")}`}</title></circle>
-                      <text x={p.x + 8} y={p.y - 6} fontSize="11" fill="var(--foreground)" className="font-mono">{flag(s.cc)} {s.cc}</text>
+                      <text x={p.x + 8} y={p.y - 6} fontSize="11" fill="var(--foreground)" className="font-mono">{s.cc}</text>
+                      <image href={`https://flagcdn.com/w40/${s.cc.toLowerCase()}.png`} x={p.x + 26} y={p.y - 16} width="16" height="11" />
                     </g>
                   );
                 })}
@@ -279,7 +279,7 @@ function Dashboard() {
                       return (
                         <tr key={a.id} className="border-t border-border/60 transition hover:bg-accent/40">
                           <td className="px-5 py-2.5 font-mono text-xs text-muted-foreground">{a.ts}</td>
-                          <td className="px-5 py-2.5 font-mono"><span className="mr-2" title={a.country}>{flag(a.cc)}</span>{a.ip}</td>
+                          <td className="px-5 py-2.5 font-mono"><img src={`https://flagcdn.com/w40/${a.cc.toLowerCase()}.png`} alt={a.country} title={a.country} className="mr-2 inline-block h-3.5 w-5 rounded-sm object-cover align-[-2px]" />{a.ip}</td>
                           <td className="px-5 py-2.5"><span className={`rounded border px-2 py-0.5 text-xs font-medium ${sevClass[a.sev]}`}>{a.sev}</span></td>
                           <td className="px-5 py-2.5">{a.type}</td>
                           <td className="px-5 py-2.5 text-muted-foreground">{isBlocked ? <span className="text-success">✓ Blocked</span> : a.action}</td>
@@ -298,7 +298,7 @@ function Dashboard() {
                 <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
                   {top ? (
                     <>
-                      <p><span className="font-medium text-foreground">Primary incident:</span> a <span className="text-destructive">{top.first.type}</span> campaign originating from <span className="font-mono text-foreground">{top.ip}</span> ({flag(top.first.cc)} {top.first.country}).</p>
+                      <p><span className="font-medium text-foreground">Primary incident:</span> a <span className="text-destructive">{top.first.type}</span> campaign originating from <span className="font-mono text-foreground">{top.ip}</span> (<img src={`https://flagcdn.com/w40/${top.first.cc.toLowerCase()}.png`} alt="" className="inline-block h-3 w-4 rounded-sm align-[-1px]" /> {top.first.country}).</p>
                       <p>The model observed {top.list.length} malicious event{top.list.length > 1 ? "s" : ""} from this source, deviating sharply from the baseline of internal traffic. The pattern matches automated tooling probing for weak credentials and unsanitized inputs rather than a human operator.</p>
                       <p><span className="font-medium text-foreground">Risk:</span> if successful, the attacker could gain shell or database access on the target server. <span className="font-medium text-foreground">Recommendation:</span> block the source at the firewall and review authentication logs for any successful logins from related ranges.</p>
                     </>
