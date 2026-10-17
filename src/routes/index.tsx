@@ -145,14 +145,14 @@ function Dashboard() {
   const top = useMemo(() => {
     const counts = new Map<string, Anomaly[]>();
     active.forEach((a) => counts.set(a.ip, [...(counts.get(a.ip) ?? []), a]));
-    const [ip, list] = [...counts.entries()].sort((x, y) => y[1].length - x[1].length || (y[1][0].sev === "High" ? 1 : -1))[0] ?? [];
-    return ip ? { ip, list: list! } : null;
+    const [ip, list] = [...counts.entries()].sort((x, y) => y[1].length - x[1].length || (y[1][0]?.sev === "High" ? 1 : -1))[0] ?? [];
+    return ip && list?.[0] ? { ip, list, first: list[0] } : null;
   }, [active]);
 
   const highCount = active.filter((a) => a.sev === "High").length;
   const score = Math.min(99, Math.round(active.length * 2.2 + highCount * 3.5));
   const activeSources = SOURCES.filter((s) => active.some((a) => s.ips.includes(a.ip)));
-  const command = top ? `sudo ufw deny from ${top.ip} to any comment "AI-SOC ${top.list[0].type}"` : "# No active threats — nothing to block";
+  const command = top ? `sudo ufw deny from ${top.ip} to any comment "AI-SOC ${top.first.type}"` : "# No active threats — nothing to block";
 
   const execute = () => {
     if (!top) return;
@@ -298,7 +298,7 @@ function Dashboard() {
                 <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
                   {top ? (
                     <>
-                      <p><span className="font-medium text-foreground">Primary incident:</span> a <span className="text-destructive">{top.list[0].type}</span> campaign originating from <span className="font-mono text-foreground">{top.ip}</span> ({flag(top.list[0].cc)} {top.list[0].country}).</p>
+                      <p><span className="font-medium text-foreground">Primary incident:</span> a <span className="text-destructive">{top.first.type}</span> campaign originating from <span className="font-mono text-foreground">{top.ip}</span> ({flag(top.first.cc)} {top.first.country}).</p>
                       <p>The model observed {top.list.length} malicious event{top.list.length > 1 ? "s" : ""} from this source, deviating sharply from the baseline of internal traffic. The pattern matches automated tooling probing for weak credentials and unsanitized inputs rather than a human operator.</p>
                       <p><span className="font-medium text-foreground">Risk:</span> if successful, the attacker could gain shell or database access on the target server. <span className="font-medium text-foreground">Recommendation:</span> block the source at the firewall and review authentication logs for any successful logins from related ranges.</p>
                     </>
