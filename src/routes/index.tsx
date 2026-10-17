@@ -60,7 +60,7 @@ const BENIGN = [
 const flag = (cc: string) => String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0)));
 const proj = (lat: number, lon: number) => ({ x: ((lon + 180) / 360) * 1000, y: ((90 - lat) / 180) * 500 });
 const now = () => new Date().toISOString().replace("T", " ").slice(0, 19);
-const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)] as T;
 const srcOf = (ip: string) => SOURCES.find((s) => s.ips.includes(ip));
 
 const CONTINENTS = [
@@ -133,8 +133,8 @@ function Dashboard() {
     let hits = 0;
     for (const line of lines) {
       const ip = line.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/)?.[0] ?? "0.0.0.0";
-      const a = /union\s+select|' or 1=1/i.test(line) ? ATTACKS[1] : /failed password/i.test(line) ? ATTACKS[0]
-        : /\.\.\//.test(line) ? ATTACKS[2] : /<script/i.test(line) ? ATTACKS[3] : null;
+      const a = /union\s+select|' or 1=1/i.test(line) ? ATTACKS[1]! : /failed password/i.test(line) ? ATTACKS[0]!!
+        : /\.\.\//.test(line) ? ATTACKS[2]! : /<script/i.test(line) ? ATTACKS[3]! : null;
       if (a) hits++;
       ingest(line, a ? { a, ip } : undefined);
     }
